@@ -121,7 +121,6 @@ namespace SaiThemeColorChanger
             toReplace.Add(new ReplacerHelper("a0a0a0", "212121")); //Color wheel fix 1
             toReplace.Add(new ReplacerHelper("707070", "212121")); //Color wheel fix 2
             toReplace.Add(new ReplacerHelper("9f9f9f", "212121")); //Color wheel fix 3
-            toReplace.Add(new ReplacerHelper("a0a0a0", "212121")); //Color wheel fix 4
 
 
 
