@@ -1,25 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using SaiDarkTheme;
+using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace SaiThemeColorChanger
 {
     //Hex strat derived from https://social.msdn.microsoft.com/Forums/vstudio/en-US/a0b2133f-ae23-4c0b-b136-dd531952f3c7/find-amp-replace-hex-values-in-a-dll-file-using-c?forum=csharpgeneral
-    class Program
+    public class Program
     {
-        public class ReplacerHelper
-        {
-            public ReplacerHelper(string search, string replace)
-            {
-                Search = search;
-                Replace = replace;
-            }
-
-            public string Search { get; }
-            public string Replace { get; }
-        }
-
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             string inputPath = "";
             if (args.Length > 0)
@@ -27,23 +17,23 @@ namespace SaiThemeColorChanger
 
             if (inputPath.Length == 0)
             {
-                System.Console.Out.WriteLine("Make sure that the parh of the executable contains no spaces");
-                System.Console.Out.WriteLine("Examples:");
-                System.Console.Out.WriteLine("I:\\PaintToolSAI\\SAI2\\Paint Tool SAI 2.0 (64bit) is not ok");
-                System.Console.Out.WriteLine("I:\\PaintToolSAI\\SAI2\\Paint_Tool_SAI_2.0_(64bit) is ok");
-                System.Console.Out.WriteLine("Drag the sai2.exe onto this window and press enter a couple of times");
-                inputPath = System.Console.ReadLine();
+                Console.WriteLine("Make sure that the path of the executable contains no spaces");
+                Console.WriteLine("Examples:");
+                Console.WriteLine("I:\\PaintToolSAI\\SAI2\\Paint Tool SAI 2.0 (64bit) is not ok");
+                Console.WriteLine("I:\\PaintToolSAI\\SAI2\\Paint_Tool_SAI_2.0_(64bit) is ok");
+                Console.WriteLine("Drag the sai2.exe onto this window and press enter a couple of times");
+                inputPath = Console.ReadLine();
                 while (!Directory.Exists(Path.GetDirectoryName(inputPath)))
                 {
-                    System.Console.Out.WriteLine("Not a valid path: " + inputPath);
-                    inputPath = System.Console.ReadLine();
+                    Console.WriteLine("Not a valid path: " + inputPath);
+                    inputPath = Console.ReadLine();
                 }
             }
 
             if (!Directory.Exists(Path.GetDirectoryName(inputPath)))
             {
-                System.Console.Out.WriteLine("Not a valid path: " + inputPath);
-                System.Console.ReadKey();
+                Console.WriteLine("Not a valid path: " + inputPath);
+                Console.ReadKey();
                 return;
             }
 
@@ -80,8 +70,8 @@ namespace SaiThemeColorChanger
             toReplace.Add(new ReplacerHelper("8c8c8c", "212121")); //Corners 6
             toReplace.Add(new ReplacerHelper("7d7d7d", "212121")); //Corners 7
 
+            toReplace.Add(new ReplacerHelper("204080", "200010")); //Brown 1, DON'T change the 20 at the start of this HEX!
 
-            toReplace.Add(new ReplacerHelper("204080", "a1a1a1")); //Brown 1
             toReplace.Add(new ReplacerHelper("204172", "a1a1a1")); //Brown 2
 
             toReplace.Add(new ReplacerHelper("1c4da8", "ffab7f")); //Brown 3
@@ -97,12 +87,6 @@ namespace SaiThemeColorChanger
             toReplace.Add(new ReplacerHelper("c02040", "ffab7f")); //Blue 2
             toReplace.Add(new ReplacerHelper("90203b", "ffab7f")); //Blue 3
 
-            //toReplace.Add(new ReplacerHelper("ffe3e3", "a25e5e")); //Blue 4
-            //toReplace.Add(new ReplacerHelper("ffdbdb", "855050")); //Blue 5
-            //toReplace.Add(new ReplacerHelper("ffd3d3", "855050")); //Blue 6
-            //toReplace.Add(new ReplacerHelper("ffeddb", "b36b6b")); //Blue 7
-            //toReplace.Add(new ReplacerHelper("fff1e3", "a16060")); //Blue 8
-
             toReplace.Add(new ReplacerHelper("ffcbcb", "ec5e5e")); //Blue corner 1
             toReplace.Add(new ReplacerHelper("ffc4c4", "ff8a8a")); //Blue corner 2
             toReplace.Add(new ReplacerHelper("ffbfbf", "ff8080")); //Blue corner 3
@@ -112,6 +96,13 @@ namespace SaiThemeColorChanger
             toReplace.Add(new ReplacerHelper("b6cced", "a1a1a1")); //Canvas select border 3
             toReplace.Add(new ReplacerHelper("d9e4f8", "a1a1a1")); //Canvas select border 4
 
+            toReplace.Add(new ReplacerHelper("a1a1a1", "0f0f0f")); //Canvas border line
+            toReplace.Add(new ReplacerHelper("eaccb6", "0f0f0f")); //Canvas border line
+            toReplace.Add(new ReplacerHelper("a7a7a7", "0f0f0f")); //Canvas selection border
+            toReplace.Add(new ReplacerHelper("dcdcdc", "0f0f0f")); //Canvas selection border
+
+            toReplace.Add(new ReplacerHelper("313131", "0f0f0f")); //Random
+            toReplace.Add(new ReplacerHelper("f0f0f0", "0f0f0f")); //Window border
 
             for (int i = 162; i <= 254; i++)
             {
@@ -123,14 +114,13 @@ namespace SaiThemeColorChanger
             toReplace.Add(new ReplacerHelper("9f9f9f", "212121")); //Color wheel fix 3
 
 
-
             for (int i = 1; i <= 8; i++)
             {
                 for (int j = 1; j <= 8; j++)
                 {
                     for (int k = 1; k <= 8; k++)
                     {
-                        if(i != j || i != k)
+                        if (i != j || i != k)
                         {
                             toReplace.Add(new ReplacerHelper("f" + i + "f" + j + "f" + k, "212121")); //Color wheel 
                         }
@@ -138,11 +128,11 @@ namespace SaiThemeColorChanger
                 }
             }
 
-            System.Console.Out.WriteLine("Replacing stuff in: " + inputPath);
+            Console.WriteLine("Replacing stuff in: " + inputPath);
             replaceHex(inputPath, outputPath, toReplace);
-            System.Console.Out.WriteLine("Replaced file saved to: " + outputPath);
-            System.Console.Out.WriteLine("Finished");
-            System.Console.ReadKey();
+            Console.WriteLine("Replaced file saved to: " + outputPath);
+            Console.WriteLine("Finished");
+            Console.ReadKey();
         }
 
         //Fuggin fug fug
@@ -162,11 +152,11 @@ namespace SaiThemeColorChanger
             if (!File.Exists(targetPath))
             {
                 File.Copy(path, targetPath);
-                System.Console.Out.WriteLine("Backup copy generated in " + targetPath);
+                Console.WriteLine("Backup copy generated in " + targetPath);
             }
             else
             {
-                System.Console.Out.WriteLine("Backup copy already exists in " + targetPath);
+                Console.WriteLine("Backup copy already exists in " + targetPath);
             }
         }
 
