@@ -5,6 +5,8 @@ INSTRUCTIONS:
 2. Go into SAI's folder and drag the file "sai.exe" into the window you just opened (Be sure to run it from somewhere with the appropriate permissions) 
 3. Press enter.
 
+Install https://dotnet.microsoft.com/en-us/download/dotnet/5.0 > under **.NET Desktop Runtime 5** click **x86** if it doesn't work!
+
 If you want to make your own custom colors, just edit the hex list in the source code given.
 
 (CHANGES)
