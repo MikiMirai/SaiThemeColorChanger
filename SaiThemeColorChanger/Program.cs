@@ -3,33 +3,47 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Newtonsoft.Json;
+using SaiThemeColorChanger.JSON_Templates;
 
 namespace SaiThemeColorChanger
 {
     //Hex strat derived from https://social.msdn.microsoft.com/Forums/vstudio/en-US/a0b2133f-ae23-4c0b-b136-dd531952f3c7/find-amp-replace-hex-values-in-a-dll-file-using-c?forum=csharpgeneral
     public class Program
     {
+        private static readonly string defaultThemesDirectory = $"{Environment.CurrentDirectory}\\Themes";
+        private static readonly string configPath = $"{Environment.CurrentDirectory}\\config.json";
+        private static Config cfg = new Config();
         public static void Main(string[] args)
         {
             string inputPath = "";
             if (args.Length > 0)
                 inputPath = args[0];
-
+            
+            // Load the configuration file
+            if (!File.Exists(Path.GetFileName(configPath)))
+            {
+                Debug.WriteLine(configPath);
+                Console.Error.WriteLine("Config file (config.json) does not exist. Please re-download the application.");
+                Console.ReadKey();
+                return;
+            }
+            cfg = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath));
+            
             if (inputPath.Length == 0)
             {
-                Console.WriteLine("Make sure that the path of the executable contains no spaces");
-                Console.WriteLine("Examples:");
-                Console.WriteLine("I:\\PaintToolSAI\\SAI2\\Paint Tool SAI 2.0 (64bit) is not ok");
-                Console.WriteLine("I:\\PaintToolSAI\\SAI2\\Paint_Tool_SAI_2.0_(64bit) is ok");
-                Console.WriteLine("Drag the sai2.exe onto this window and press enter a couple of times");
-                inputPath = Console.ReadLine();
+                Console.WriteLine("Drag 'sai2.exe' in this window or write the full path with the executable (MUST NOT INCLUDE DOUBLE QUOTES):");
+                // Using verbatim string, this will ignore special characters like spaces in a path.
+                inputPath = @$"{Console.ReadLine()}";
                 while (!Directory.Exists(Path.GetDirectoryName(inputPath)))
                 {
                     Console.WriteLine("Not a valid path: " + inputPath);
                     inputPath = Console.ReadLine();
                 }
             }
-
+            
             if (!Directory.Exists(Path.GetDirectoryName(inputPath)))
             {
                 Console.WriteLine("Not a valid path: " + inputPath);
@@ -38,103 +52,194 @@ namespace SaiThemeColorChanger
             }
 
             string outputPath = inputPath;   //Needs to be the same as the original or Sai throws a weird error with moonrunes 
+            Dictionary<int, string> filesList = null;
+            if (!Directory.Exists(@$"{Environment.CurrentDirectory}\\Themes"))
+            {
+                Console.WriteLine("Directory 'Themes' was not found! Please re-download the program.");
+                Console.ReadKey();
+                return;
+            }
 
+            string previousThemeUsed = null;
+            string selectedThemePath = null;
+            string selectedThemeName = null;
+            if (Directory.GetFiles(defaultThemesDirectory).Any())
+            {
+                Console.WriteLine("Found themes in 'Themes' folder:");
+                filesList = new Dictionary<int, string>();
+                int index = 0;
+                foreach (var themeFile in Directory.GetFiles(defaultThemesDirectory))
+                {
+                    Console.WriteLine($"[{index}] {Path.GetFileNameWithoutExtension(themeFile).Replace(".theme", "")}");
+                    filesList.Add(index, themeFile);
+                    index++;
+                }
+                previousThemeUsed = filesList.FirstOrDefault(t => Path.GetFileNameWithoutExtension(t.Value) == cfg.CurrentUsedTheme).Value;
+                if (string.IsNullOrEmpty(previousThemeUsed))
+                {
+                    Console.Error.WriteLine("Cannot find last used theme in 'Themes' Directory. Program cannot continue.");
+                    Console.ReadKey();
+                    return;
+                }
+                bool selectedValidFile = false;
+
+                while (!selectedValidFile)
+                {
+                    Console.WriteLine("Which theme would you like to use?");
+                    try
+                    {
+                        int themeFileInput = int.Parse(Console.ReadLine() ?? string.Empty);
+                        if (themeFileInput >= 0 || themeFileInput <= index)
+                        {
+                            selectedThemePath = filesList[themeFileInput];
+                            selectedThemeName = $"{Path.GetFileNameWithoutExtension(selectedThemePath).Replace(".theme", "")}";
+                            if (cfg != null && selectedThemeName == cfg.CurrentUsedTheme)
+                            {
+                                Console.Error.WriteLine("This theme is already used in SAI, please use another theme.");
+                                continue;
+                            }
+                            Console.WriteLine($"Selected theme '{selectedThemeName}'");
+                            selectedValidFile = true;
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                       Console.WriteLine("Invalid Input.");
+                    }
+                    
+                }
+            }
             List<ReplacerHelper> toReplace = new List<ReplacerHelper>();
-            //TODO could probably make this just read out of a text file is people decide my gray is horrible
+
+            ColorTheme oldTheme, newTheme;
+            try
+            {
+                oldTheme = JsonConvert.DeserializeObject<ColorTheme>(File.ReadAllText(previousThemeUsed));
+                newTheme = JsonConvert.DeserializeObject<ColorTheme>(File.ReadAllText(selectedThemePath));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
             //Hex color code -> replacement (won't work with pure white and pure black, but everything else seems fine!)
             //Basically this replaces left hex with the right hex.
             //You can swap out the values to get other colors, I haven't noticed any issues using a version with these values modified
-            toReplace.Add(new ReplacerHelper("f8f8f8", "212121")); //Main panel color
-            toReplace.Add(new ReplacerHelper("c0c0c0", "111111")); //Canvas background color
-            toReplace.Add(new ReplacerHelper("e8e8e8", "3a3a3a")); //Scrollbar insides
-            toReplace.Add(new ReplacerHelper("969696", "2a2a2a")); //Scrollbars
-            toReplace.Add(new ReplacerHelper("f0f0f0", "212121")); //Tools background
-            toReplace.Add(new ReplacerHelper("d4d4d4", "212121")); //Inactive scrollbar 
-            toReplace.Add(new ReplacerHelper("b0b0b0", "111111")); //Active canvas background
-            toReplace.Add(new ReplacerHelper("e0e0e0", "313131")); //Tools panel background
+            
+            toReplace.Add(new ReplacerHelper(oldTheme.main_panel, newTheme.main_panel)); //Main panel color
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_background, newTheme.canvas_background)); //Canvas background color
+            toReplace.Add(new ReplacerHelper(oldTheme.scrollbar_insides, newTheme.scrollbar_insides)); //Scrollbar insides
+            toReplace.Add(new ReplacerHelper(oldTheme.scrollbars, newTheme.scrollbars)); //Scrollbars
+            toReplace.Add(new ReplacerHelper(oldTheme.tools_background, newTheme.tools_background)); //Tools background
+            toReplace.Add(new ReplacerHelper(oldTheme.inactive_scrollbar, newTheme.inactive_scrollbar)); //Inactive scrollbar 
+            toReplace.Add(new ReplacerHelper(oldTheme.active_canvas_background, newTheme.active_canvas_background)); //Active canvas background
+            toReplace.Add(new ReplacerHelper(oldTheme.tools_panel_background, newTheme.tools_panel_background)); //Tools panel background
+            toReplace.Add(new ReplacerHelper(oldTheme.panel_borders.borders_1, newTheme.panel_borders.borders_1)); //Panel borders 1 
+            toReplace.Add(new ReplacerHelper(oldTheme.panel_borders.borders_2, newTheme.panel_borders.borders_2)); //Panel borders 2 
+            toReplace.Add(new ReplacerHelper(oldTheme.panel_borders.borders_3, newTheme.panel_borders.borders_3)); //Panel borders 3 
+            toReplace.Add(new ReplacerHelper(oldTheme.panel_borders.borders_4, newTheme.panel_borders.borders_4)); //Panel borders 4 
+            toReplace.Add(new ReplacerHelper(oldTheme.panel_borders.borders_5, newTheme.panel_borders.borders_5)); //Panel borders 5 
+            toReplace.Add(new ReplacerHelper(oldTheme.panel_borders.borders_6, newTheme.panel_borders.borders_6)); //Panel borders 6  
+            toReplace.Add(new ReplacerHelper(oldTheme.panel_seperator_btn, newTheme.panel_seperator_btn)); //Panel separator button 1
+            toReplace.Add(new ReplacerHelper(oldTheme.corners.corners_1, newTheme.corners.corners_1)); //Corners 1
+            toReplace.Add(new ReplacerHelper(oldTheme.corners.corners_2, newTheme.corners.corners_2)); //Corners 2
+            toReplace.Add(new ReplacerHelper(oldTheme.corners.corners_3, newTheme.corners.corners_3)); //Corners 3
+            toReplace.Add(new ReplacerHelper(oldTheme.corners.corners_4, newTheme.corners.corners_4)); //Corners 4
+            toReplace.Add(new ReplacerHelper(oldTheme.corners.corners_5, newTheme.corners.corners_5)); //Corners 5
+            toReplace.Add(new ReplacerHelper(oldTheme.corners.corners_6, newTheme.corners.corners_6)); //Corners 6
+            toReplace.Add(new ReplacerHelper(oldTheme.corners.corners_7, newTheme.corners.corners_7)); //Corners 7
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_1, newTheme.brown.brown_1)); //Brown 1, DON'T change the 20 at the start of this HEX!
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_2, newTheme.brown.brown_2)); //Brown 2
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_3, newTheme.brown.brown_3)); //Brown 3
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_4, newTheme.brown.brown_4)); //Brown 4
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_5, newTheme.brown.brown_5)); //Brown 5
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_6, newTheme.brown.brown_6)); //Brown 6
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_7, newTheme.brown.brown_7)); //Brown 7
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_8, newTheme.brown.brown_8)); //Brown 8
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_9, newTheme.brown.brown_9)); //Brown 9
+            toReplace.Add(new ReplacerHelper(oldTheme.brown.brown_10, newTheme.brown.brown_10)); //Brown 10
+            toReplace.Add(new ReplacerHelper(oldTheme.blue.blue_1, newTheme.blue.blue_1)); //Blue 1
+            toReplace.Add(new ReplacerHelper(oldTheme.blue.blue_2, newTheme.blue.blue_2)); //Blue 2
+            toReplace.Add(new ReplacerHelper(oldTheme.blue.blue_3, newTheme.blue.blue_3)); //Blue 3
+            toReplace.Add(new ReplacerHelper(oldTheme.blue.blue_corner_1, newTheme.blue.blue_corner_1)); //Blue corner 1
+            toReplace.Add(new ReplacerHelper(oldTheme.blue.blue_corner_2, newTheme.blue.blue_corner_2)); //Blue corner 2
+            toReplace.Add(new ReplacerHelper(oldTheme.blue.blue_corner_3, newTheme.blue.blue_corner_3)); //Blue corner 3
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_select_border.border_1, newTheme.canvas_select_border.border_1)); //Canvas select border 1
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_select_border.border_2, newTheme.canvas_select_border.border_2)); //Canvas select border 2
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_select_border.border_3, newTheme.canvas_select_border.border_3)); //Canvas select border 3
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_select_border.border_4, newTheme.canvas_select_border.border_4)); //Canvas select border 4
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_border_line.border_line_1, newTheme.canvas_border_line.border_line_1)); //Canvas border line
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_border_line.border_line_2, newTheme.canvas_border_line.border_line_2)); //Canvas border line
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_select_border.selection_border_1, newTheme.canvas_select_border.selection_border_1)); //Canvas selection border
+            toReplace.Add(new ReplacerHelper(oldTheme.canvas_select_border.selection_border_2, newTheme.canvas_select_border.selection_border_2)); //Canvas selection border
+            toReplace.Add(new ReplacerHelper(oldTheme.Random, newTheme.Random)); //Random
+            toReplace.Add(new ReplacerHelper(oldTheme.window_border, newTheme.window_border)); //Window border
+            
+            // TODO: This need to be fixed. Someone else do this please :(
+            // toReplace.AddRange(doColorWheelFix(true, newTheme, oldTheme));
 
-            toReplace.Add(new ReplacerHelper("b1b1b1", "313131")); //Panel borders 1 
-            toReplace.Add(new ReplacerHelper("d0d0d0", "313131")); //Panel borders 2 
-            toReplace.Add(new ReplacerHelper("d8d8d8", "313131")); //Panel borders 3 
-            toReplace.Add(new ReplacerHelper("dadada", "313131")); //Panel borders 4 
-            toReplace.Add(new ReplacerHelper("e4e4e4", "313131")); //Panel borders 5 
-            toReplace.Add(new ReplacerHelper("f4f4f4", "313131")); //Panel borders 6  
-
-            toReplace.Add(new ReplacerHelper("c6c6c6", "707070")); //Panel separator button 1
-
-            toReplace.Add(new ReplacerHelper("cecece", "111111")); //Corners 1
-            toReplace.Add(new ReplacerHelper("c9c9c9", "111111")); //Corners 2
-            toReplace.Add(new ReplacerHelper("eeeeee", "2d2d2d")); //Corners 3
-            toReplace.Add(new ReplacerHelper("dedede", "313131")); //Corners 4
-            toReplace.Add(new ReplacerHelper("b4b4b4", "313131")); //Corners 5
-            toReplace.Add(new ReplacerHelper("8c8c8c", "212121")); //Corners 6
-            toReplace.Add(new ReplacerHelper("7d7d7d", "212121")); //Corners 7
-
-            toReplace.Add(new ReplacerHelper("204080", "200010")); //Brown 1, DON'T change the 20 at the start of this HEX!
-
-            toReplace.Add(new ReplacerHelper("204172", "a1a1a1")); //Brown 2
-
-            toReplace.Add(new ReplacerHelper("1c4da8", "ffab7f")); //Brown 3
-            toReplace.Add(new ReplacerHelper("234a93", "ffab7f")); //Brown 4
-            toReplace.Add(new ReplacerHelper("254177", "ffab7f")); //Brown 5
-            toReplace.Add(new ReplacerHelper("1f2e49", "ffab7f")); //Brown 6
-            toReplace.Add(new ReplacerHelper("436616", "ffab7f")); //Brown 7
-            toReplace.Add(new ReplacerHelper("22437f", "ffab7f")); //Brown 8
-            toReplace.Add(new ReplacerHelper("214d9e", "ffab7f")); //Brown 9
-            toReplace.Add(new ReplacerHelper("90b0e8", "ffab7f")); //Brown 10
-
-            toReplace.Add(new ReplacerHelper("ff3050", "ffab7f")); //Blue 1
-            toReplace.Add(new ReplacerHelper("c02040", "ffab7f")); //Blue 2
-            toReplace.Add(new ReplacerHelper("90203b", "ffab7f")); //Blue 3
-
-            toReplace.Add(new ReplacerHelper("ffcbcb", "ec5e5e")); //Blue corner 1
-            toReplace.Add(new ReplacerHelper("ffc4c4", "ff8a8a")); //Blue corner 2
-            toReplace.Add(new ReplacerHelper("ffbfbf", "ff8080")); //Blue corner 3
-
-            toReplace.Add(new ReplacerHelper("548cd7", "a1a1a1")); //Canvas select border 1
-            toReplace.Add(new ReplacerHelper("6e9ee0", "a1a1a1")); //Canvas select border 2
-            toReplace.Add(new ReplacerHelper("b6cced", "a1a1a1")); //Canvas select border 3
-            toReplace.Add(new ReplacerHelper("d9e4f8", "a1a1a1")); //Canvas select border 4
-
-            toReplace.Add(new ReplacerHelper("a1a1a1", "0f0f0f")); //Canvas border line
-            toReplace.Add(new ReplacerHelper("eaccb6", "0f0f0f")); //Canvas border line
-            toReplace.Add(new ReplacerHelper("a7a7a7", "0f0f0f")); //Canvas selection border
-            toReplace.Add(new ReplacerHelper("dcdcdc", "0f0f0f")); //Canvas selection border
-
-            toReplace.Add(new ReplacerHelper("313131", "0f0f0f")); //Random
-            toReplace.Add(new ReplacerHelper("f0f0f0", "0f0f0f")); //Window border
-
-            for (int i = 162; i <= 254; i++)
+            makeBackup(inputPath);
+            Console.WriteLine("Replacing stuff in: " + inputPath);
+            replaceHex(inputPath, outputPath, toReplace);
+            Console.WriteLine("Replaced file saved to: " + outputPath);
+            if (cfg != null)
             {
-                toReplace.Add(new ReplacerHelper("" + i.ToString("X2") + i.ToString("X2") + i.ToString("X2"), "212121")); //Color wheel fix
+                Console.WriteLine("Updating config");
+                cfg.CurrentUsedTheme = $"{selectedThemeName}.theme";
+                File.WriteAllText(configPath, JsonConvert.SerializeObject(cfg));
             }
 
-            toReplace.Add(new ReplacerHelper("a0a0a0", "212121")); //Color wheel fix 1
-            toReplace.Add(new ReplacerHelper("707070", "212121")); //Color wheel fix 2
-            toReplace.Add(new ReplacerHelper("9f9f9f", "212121")); //Color wheel fix 3
+            Console.WriteLine("Finished");
+            
+            Console.ReadKey();
+        }
 
-
-            for (int i = 1; i <= 8; i++)
+        private static List<ReplacerHelper> doColorWheelFix(bool NoItterVals, ColorTheme newTheme, ColorTheme oldTheme)
+        {
+            List<ReplacerHelper> colorWheelFixes = new List<ReplacerHelper>();
+            if (!NoItterVals)
             {
-                for (int j = 1; j <= 8; j++)
+                for (int i = 162; i <= 254; i++)
                 {
-                    for (int k = 1; k <= 8; k++)
+                    colorWheelFixes.Add(new ReplacerHelper("" + i.ToString("X2") + i.ToString("X2") + i.ToString("X2"), "212121")); //Color wheel fix (1 in file)
+                }
+            }
+
+            try
+            {
+                if (!newTheme.color_wheel_fixes.revert_fix)
+                {
+                    colorWheelFixes.Add(new ReplacerHelper(oldTheme.color_wheel_fixes.fix_2,
+                        newTheme.color_wheel_fixes.fix_2)); //Color wheel fix 1 (2 in file)
+                    colorWheelFixes.Add(new ReplacerHelper(oldTheme.color_wheel_fixes.fix_3,
+                        newTheme.color_wheel_fixes.fix_3)); //Color wheel fix 2 (3 in file)
+                    colorWheelFixes.Add(new ReplacerHelper(oldTheme.color_wheel_fixes.fix_4,
+                        newTheme.color_wheel_fixes.fix_4)); //Color wheel fix 3 (4 in file)
+                }
+
+            }
+            catch { }
+            if (!NoItterVals)
+            {
+                for (int i = 1; i <= 8; i++)
+                {
+                    for (int j = 1; j <= 8; j++)
                     {
-                        if (i != j || i != k)
+                        for (int k = 1; k <= 8; k++)
                         {
-                            toReplace.Add(new ReplacerHelper("f" + i + "f" + j + "f" + k, "212121")); //Color wheel 
+                            if (i != j || i != k)
+                            {
+                                colorWheelFixes.Add(new ReplacerHelper("f" + i + "f" + j + "f" + k, "212121")); //Color wheel 
+                            }
                         }
                     }
                 }
             }
 
-            Console.WriteLine("Replacing stuff in: " + inputPath);
-            replaceHex(inputPath, outputPath, toReplace);
-            Console.WriteLine("Replaced file saved to: " + outputPath);
-            Console.WriteLine("Finished");
-            Console.ReadKey();
+            return colorWheelFixes;
         }
-
+        
         //Fuggin fug fug
         //Cut the hex string -> byte array
         public static byte[] GetByteArray(string str)
@@ -146,9 +251,10 @@ namespace SaiThemeColorChanger
                                 .ToArray();
         }
 
-        public static void makeCopy(string path)
+        public static void makeBackup(string path)
         {
-            string targetPath = Path.GetDirectoryName(path) + @"\" + Path.GetFileNameWithoutExtension(path) + "- BACKUP with original UI" + Path.GetExtension(path);
+            // To the person who previously wrote this: Parsing the extension of the file name with Path is redundant, since we only open an .exe file. 
+            string targetPath = $"{Path.GetDirectoryName(path)}\\{Path.GetFileNameWithoutExtension(path)}_backup_{DateTime.Now.ToString("hhmmss")}.exe";
             if (!File.Exists(targetPath))
             {
                 File.Copy(path, targetPath);

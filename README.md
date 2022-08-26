@@ -11,12 +11,12 @@ If you want to make your own custom colors, just edit the hex list in the source
 
 (CHANGES)
 - NotBoogie's original project had very light colors, so Nyamhk and BusteanHAN changed the UI hex codes into others similar to Clip Studio's dark mode.
-- BusteanHAN wrote a for loop to fix the light gray pixels around the color wheel. This only works in 100% interface scaling though.
+- BusteanHAN wrote a for loop to fix the light gray pixels around the color wheel. This only works in 100% interface scaling though. (DISABLED DUE TO HAVING ISSUES)
 - Miki and Nyamhk changed the remaining hex codes
 - Miki and Nyamhk fixed a bug in which the layer blending mode panel and the resize canvas panel would not open and cause a bunch of errors.
 
 (NOTES)
-- Because this works on the compiled program, every hex code has been found manually and any other changes require brute forcing of memory addresses that would make this color changer incompatible with potential newer versions of the program.
+- Because this works on the compiled program, every hex code has been found manually and any other changes require brute forcing of memory addresses that would make this color changer incompatible with potential newer versions of the program. 
 - Trying to change pure black (#000000) and pure white (#ffffff) breaks the program.
 - All hex codes that start with 20 can only be changed with other hex codes that start with 20 or the blending modes break due to the memory address issue mentioned earlier.
 - Some hex codes get flipped by the program for some reason (#204080 becomes #804020), for some reason.

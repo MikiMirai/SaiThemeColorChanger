@@ -1,0 +1,62 @@
+{
+	"main_panel": "212121",
+	"canvas_background": "111111",
+	"scrollbar_insides": "3a3a3a",
+	"scrollbars": "2a2a2a",
+	"tools_background": "212121",
+	"inactive_scrollbar": "212121", 
+	"active_canvas_background": "111111",
+	"tools_panel_background": "313131",
+	"panel_borders": {
+		"borders_1": "313131",
+		"borders_2": "313131",
+		"borders_3": "313131",
+		"borders_4": "313131",
+		"borders_5": "313131",
+		"borders_6": "313131"
+	},
+	"panel_seperator_btn": "707070", 
+	"corners": {
+		"corners_1": "111111",
+		"corners_2": "111111",
+		"corners_3": "2d2d2d",
+		"corners_4": "313131",
+		"corners_5": "313131",
+		"corners_6": "212121",
+		"corners_7": "212121"
+	},
+	"brown": {
+		"brown_1": "200010",
+		"brown_2": "a1a1a1",
+		"brown_3": "ffab7f",
+		"brown_4": "ffab7f",
+		"brown_5": "ffab7f",
+		"brown_6": "ffab7f",
+		"brown_7": "ffab7f",
+		"brown_8": "ffab7f",
+		"brown_9": "ffab7f",
+		"brown_10": "ffab7f"
+	},
+	"blue": {
+		"blue_1": "ffab7f",
+		"blue_2": "ffab7f",
+		"blue_3": "ffab7f",
+		"blue_corner_1": "ec5e5e",
+		"blue_corner_2": "ff8a8a",
+		"blue_corner_3": "ff8080"
+	},
+	"canvas_select_border": {
+		"border_1": "a1a1a1",
+		"border_2": "a1a1a1",
+		"border_3": "a1a1a1",
+		"border_4": "a1a1a1",
+		"selection_border_1": "0f0f0f",
+		"selection_border_2": "0f0f0f"
+	},
+	"canvas_border_line": {
+		"border_line_1": "0f0f0f",
+		"border_line_2": "0f0f0f"
+	},
+	"why_is_this_random?": "0f0f0f",
+	"window_border": "0f0f0f"
+}
