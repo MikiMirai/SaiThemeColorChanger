@@ -17,12 +17,9 @@ namespace SaiThemeColorChanger
 
             if (inputPath.Length == 0)
             {
-                Console.WriteLine("Make sure that the path of the executable contains no spaces");
-                Console.WriteLine("Examples:");
-                Console.WriteLine("I:\\PaintToolSAI\\SAI2\\Paint Tool SAI 2.0 (64bit) is not ok");
-                Console.WriteLine("I:\\PaintToolSAI\\SAI2\\Paint_Tool_SAI_2.0_(64bit) is ok");
                 Console.WriteLine("Drag the sai2.exe onto this window and press enter a couple of times");
-                inputPath = Console.ReadLine();
+                // Using verbatim string, this will ignore special characters like spaces in a path.
+                inputPath = @$"{Console.ReadLine()}";
                 while (!Directory.Exists(Path.GetDirectoryName(inputPath)))
                 {
                     Console.WriteLine("Not a valid path: " + inputPath);
