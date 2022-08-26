@@ -1,0 +1,70 @@
+{
+	"main_panel": "f8f8f8",
+	"canvas_background": "c0c0c0",
+	"scrollbar_insides": "e8e8e8",
+	"scrollbars": "969696",
+	"tools_background": "f0f0f0",
+	"inactive_scrollbar": "d4d4d4", 
+	"active_canvas_background": "b0b0b0",
+	"tools_panel_background": "e0e0e0",
+	"panel_borders": {
+		"borders_1": "b1b1b1",
+		"borders_2": "d0d0d0",
+		"borders_3": "d8d8d8",
+		"borders_4": "dadada",
+		"borders_5": "e4e4e4",
+		"borders_6": "f4f4f4"
+	},
+	"panel_seperator_btn": "c6c6c6", 
+	"corners": {
+		"corners_1": "cecece",
+		"corners_2": "c9c9c9",
+		"corners_3": "eeeeee",
+		"corners_4": "dedede",
+		"corners_5": "b4b4b4",
+		"corners_6": "8c8c8c",
+		"corners_7": "7d7d7d"
+	},
+	"brown": {
+		"brown_1": "204080",
+		"brown_2": "204172",
+		"brown_3": "1c4da8",
+		"brown_4": "234a93",
+		"brown_5": "254177",
+		"brown_6": "1f2e49",
+		"brown_7": "436616",
+		"brown_8": "22437f",
+		"brown_9": "214d9e",
+		"brown_10": "90b0e8"
+	},
+	"blue": {
+		"blue_1": "ff3050",
+		"blue_2": "c02040",
+		"blue_3": "90203b",
+		"blue_corner_1": "ffcbcb",
+		"blue_corner_2": "ffc4c4",
+		"blue_corner_3": "ffbfbf"
+	},
+	"canvas_select_border": {
+		"border_1": "548cd7",
+		"border_2": "6e9ee0",
+		"border_3": "b6cced",
+		"border_4": "d9e4f8",
+		"selection_border_1": "a7a7a7",
+		"selection_border_2": "dcdcdc"
+	},
+	"canvas_border_line": {
+		"border_line_1": "a1a1a1",
+		"border_line_2": "eaccb6"
+	},
+	"why_is_this_random?": "313131",
+	"window_border": "f0f0f0",
+	"color_wheel_fixes": {
+		"revert_fix": true,
+		"range_162_to_254_fix": "",
+		"fix_2": "",
+		"fix_3": "",
+		"fix_4": "",
+		"color_wheel": ""
+	}
+}
