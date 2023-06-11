@@ -7,7 +7,7 @@ INSTRUCTIONS:
 
 Install https://dotnet.microsoft.com/en-us/download/dotnet/5.0 > under **.NET Desktop Runtime 5** click **x86** if it doesn't work!
 
-If you want to make your own custom colors, just edit the hex list in the source code given.
+If you want to make your own custom colors, just edit the HEX list in the source code given. There is a very high risk of breaking SAI with some HEX codes so do this only if you really know what you are doing!
 
 (CHANGES)
 - NotBoogie's original project had very light colors, so Nyamhk and BusteanHAN changed the UI hex codes into others similar to Clip Studio's dark mode.
