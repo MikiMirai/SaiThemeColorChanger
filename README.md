@@ -1,5 +1,5 @@
 INSTRUCTIONS:
-!!!!(It is recommended to back up your sai folder first just in case anything goes wrong, just save it to your desktop or something. Just copy it and paste it somewhere else to do this.)!!!!
+⚠️⚠️⚠️(It is recommended to back up your sai folder first just in case anything goes wrong, just save it to your desktop or something. Just copy it and paste it somewhere else to do this.)⚠️⚠️⚠️
 
 1. Open "SaiThemeColorChanger.exe".
 2. Go into SAI's folder and drag the file "sai.exe" into the window you just opened (Be sure to run it from somewhere with the appropriate permissions) 
