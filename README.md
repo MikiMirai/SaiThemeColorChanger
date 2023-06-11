@@ -16,7 +16,7 @@ If you want to make your own custom colors, just edit the HEX list in the source
 - Miki and Nyamhk fixed a bug in which the layer blending mode panel and the resize canvas panel would not open and cause a bunch of errors.
 
 (NOTES)
-- Because this works on the compiled program, every hex code has been found manually and any other changes require brute forcing of memory addresses that would make this color changer incompatible with potential newer versions of the program.
-- Trying to change pure black (#000000) and pure white (#ffffff) breaks the program.
-- All hex codes that start with 20 can only be changed with other hex codes that start with 20 or the blending modes break due to the memory address issue mentioned earlier.
-- Some hex codes get flipped by the program for some reason (#204080 becomes #804020), for some reason.
+- Most likely won't work with new versions. Because this works on the compiled program, every HEX code has been found manually and any other changes require brute forcing of memory addresses, potentially making this incompatible with future versions that changes the HEX codes.
+- Trying to change to pure black (#000000) and pure white (#ffffff) breaks the program.
+- All HEX codes that start with 20 can only be changed with other HEX codes that start with 20 or the blending modes break due to the memory address issue mentioned earlier.
+- Some HEX codes get flipped by the program for some reason, #204080 becomes #804020 for example.
